@@ -20,3 +20,5 @@ def getLastDirectory(inputDir):
     if inputDir.endswith('/'):
         inputDir = inputDir[-1]
     return os.path.split(inputDir)[-1]
+
+
