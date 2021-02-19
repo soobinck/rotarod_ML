@@ -1,0 +1,4 @@
+from dataAnalysis.stepUP.waitTimeB4StepUpPlot import waitTimeB4StepUpPlot
+from dataAnalysis.stepUP.stepUpHeightCalculation import calculateStepUpHeight
+from dataAnalysis.stepUP.stepUpHeightPlot_singleCSV import stepUpHeightPlot
+from dataAnalysis.stepUP.stepUpHeightPlot_2CSVsArraySidebySide import stepUp2HeightPlot
