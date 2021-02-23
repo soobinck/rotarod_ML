@@ -33,7 +33,8 @@ day4YAC = '/alder/home/soobink/rotarod_ML10/output/Day4_YAC'
 day3and4WT = '/alder/home/soobink/rotarod_ML10/output/Day3and4_WT'
 day3and4YAC = '/alder/home/soobink/rotarod_ML10/output/Day3and4_YAC'
 
-paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
+# paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
+paths = [day3and4YAC]
 perplexities = [20, 30, 100]
 
 for perplexity in perplexities:
