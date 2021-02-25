@@ -27,12 +27,12 @@ def getLastDirectory(inputDir):
     return os.path.split(inputDir)[-1]
 
 
-day3WT = os.path.join('..', 'output', 'Day3_WT')
-day3YAC = os.path.join('..', 'output', 'Day3_YAC')
-day4WT = os.path.join('..', 'output', 'Day4_WT')
-day4YAC = os.path.join('..', 'output', 'Day4_YAC')
-day3and4WT = os.path.join('..', 'output', 'Day3and4_WT')
-day3and4YAC = os.path.join('..', 'output', 'Day3and4_YAC')
+day3WT = os.path.join('..', '..', 'output', 'Day3_WT')
+day3YAC = os.path.join('..', '..', 'output', 'Day3_YAC')
+day4WT = os.path.join('..', '..', 'output', 'Day4_WT')
+day4YAC = os.path.join('..', '..', 'output', 'Day4_YAC')
+day3and4WT = os.path.join('..', '..', 'output', 'Day3and4_WT')
+day3and4YAC = os.path.join('..', '..', 'output', 'Day3and4_YAC')
 
 paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
 # paths = [day3and4YAC]
@@ -101,7 +101,7 @@ for perplexity in perplexities:
 
         name = getLastDirectory(path)
         plt.title(' 2D Body coordinate clusters: total frames %s\n%s, perplexity = %i' % (
-        str(len(communities_2d)), name, perplexity))
+            str(len(communities_2d)), name, perplexity))
 
         plt.savefig(os.path.join('plots', name + 'p' + str(perplexity) + '.png'), format='png')
 
