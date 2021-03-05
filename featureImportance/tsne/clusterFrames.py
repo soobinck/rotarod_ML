@@ -41,7 +41,7 @@ ks = [30, 50, 100, 10]  # K for k-means step of phenograph
 for perplexity in perplexities:
     for k in ks:
         for path in paths:
-            print('Running %s with perplexity = %i.' % (path, perplexity))
+            print('Running %s with k = %i, perplexity = %i.' % (path, k, perplexity))
             data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
 
             # data_3d = ['LD1_1580415036_3d.csv']
@@ -83,28 +83,3 @@ for perplexity in perplexities:
 
             communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
             n_clus_2d = np.unique(communities_2d).shape[0]
-
-            # --end of phenograph
-
-            # tsne_model = TSNE(n_components=2, random_state=2,perplexity=100,angle=0.1,init='pca',n_jobs= mp.cpu_count()-1)
-            tsne_model = TSNE(n_components=2, random_state=2, perplexity=perplexity, angle=0.1, init='pca', n_jobs=-1,
-                              verbose=100)
-            Y_2d = tsne_model.fit_transform(coords_all_2d)
-            cmap = plt.cm.colors.ListedColormap(plt.cm.jet(np.linspace(0, 1, n_clus_2d)))
-            plt.figure()
-            plt.scatter(Y_2d[:, 0], Y_2d[:, 1],
-                        c=communities_2d,
-                        cmap=cmap,
-                        alpha=0.9,
-                        s=0.5)
-            plt.colorbar(ticks=np.unique(communities_2d), label='Cluster#')
-            plt.xlabel('TSNE1');
-            plt.ylabel('TSNE2')
-
-            name = getLastDirectory(path)
-            plt.title(' 2D Body coordinate clusters: total frames %s\n%s, perplexity = %i, k = %i' % (
-                str(len(communities_2d)), name, perplexity, k))
-
-            plt.savefig(os.path.join('plots', name + 'p' + str(perplexity) + '.png'), format='png')
-
-            plt.show()
