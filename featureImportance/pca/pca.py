@@ -41,7 +41,7 @@ def myplot(score, coeff, labels=None):
     plt.ylabel("PC{}".format(2))
     plt.grid()
 
-    
+
 def getLastDirectory(inputDir):
     if inputDir.endswith('/'):
         inputDir = inputDir[-1]
@@ -61,7 +61,7 @@ columnNames = ['rel RightY mm', 'rel LeftY mm', 'rel LeftX mm', 'rel RightX mm',
                'Leftpaw euclidean velocity', 'wait time b4 step up']
 # for path in paths:
 for path in paths:
-    data_2d = [f for f in listdir(path)[:2] if (isfile(join(path, f)) and (not f.startswith('.')))]
+    data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
 
     # data_3d = ['LD1_1580415036_3d.csv']
     x = pd.DataFrame()
@@ -126,8 +126,4 @@ for path in paths:
 
     ax.set_aspect("equal")
 
-    heatmap.savefig(os.path.join('plots', name + '_headmap' + '.png'), format='png')
-
-
-
-    break
+    heatmap.savefig(os.path.join('plots', 'heatmap_' + name  + '.png'), format='png')
