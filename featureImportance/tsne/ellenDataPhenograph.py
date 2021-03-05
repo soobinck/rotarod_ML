@@ -1,5 +1,4 @@
 from sklearn.manifold import TSNE
-from scipy.cluster.hierarchy import dendrogram
 from pytransform3d.rotations import *
 from varname import nameof
 
@@ -20,6 +19,8 @@ import pandas as pd
 import phenograph
 import io
 
+df = pd.DataFrame([1, 2, 3])
+
 
 def getLastDirectory(inputDir):
     if inputDir.endswith('/'):
@@ -35,74 +36,75 @@ day3and4WT = os.path.join('..', '..', 'output', 'Day3and4_WT')
 day3and4YAC = os.path.join('..', '..', 'output', 'Day3and4_YAC')
 
 paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
-# paths = [day3and4YAC]
 perplexities = [30, 100]
-
+ks = [30, 50, 100, 10]  # K for k-means step of phenograph
 for perplexity in perplexities:
-    for path in paths:
-        print('Running %s with perplexity = %i.' % (path, perplexity))
-        data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
+    for k in ks:
+        for path in paths:
+            print('Running %s with perplexity = %i.' % (path, perplexity))
+            data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
 
-        # data_3d = ['LD1_1580415036_3d.csv']
-        coords_all_2d = []
-        coords_all_3d = []
-        dataset_name_2d = []
-        dataset_name_3d = []
+            # data_3d = ['LD1_1580415036_3d.csv']
+            coords_all_2d = []
+            coords_all_3d = []
+            dataset_name_2d = []
+            dataset_name_3d = []
 
-        # for f_2d, f_3d in zip(data_2d, data_3d):
-        for f_2d in data_2d:
-            coords_file = os.path.join(path, f_2d)
-            dataset_name_2d = coords_file
-            # coords_2d = pd.read_csv(coords_file, dtype=np.float, header=2, index_col=0)
-            coords_2d = pd.read_csv(coords_file, dtype=float, header=0, index_col=0)
-            coords_2d.dropna(axis=0, inplace=True)
-            coords_2d = coords_2d.values[:, 3:]  # exclude first column
-            coords_2d = np.delete(coords_2d, list(range(2, coords_2d.shape[1], 3)),
-                                  axis=1)  # delete every 3rd column of prediction score
-            coords_all_2d.append(coords_2d)
+            # for f_2d, f_3d in zip(data_2d, data_3d):
+            for f_2d in data_2d:
+                coords_file = os.path.join(path, f_2d)
+                dataset_name_2d = coords_file
+                # coords_2d = pd.read_csv(coords_file, dtype=np.float, header=2, index_col=0)
+                coords_2d = pd.read_csv(coords_file, dtype=float, header=0, index_col=0)
+                coords_2d.dropna(axis=0, inplace=True)
+                coords_2d = coords_2d.values[:, 3:]  # exclude first column
+                coords_2d = np.delete(coords_2d, list(range(2, coords_2d.shape[1], 3)),
+                                      axis=1)  # delete every 3rd column of prediction score
+                coords_all_2d.append(coords_2d)
 
-            # coords_file = data_root + os.sep + f_3d
-            # dataset_name_3d = coords_file.split('/')[-1].split('.')[0]
-            # coords_3d = pd.read_csv(coords_file, header=2)
-            # coords_3d = coords_3d.values[:, 1:]  # exclude the index column
-            # coords_3d = np.around(coords_3d.astype('float'), 2)  # round to two decimal places
-            # coords_3d = gaussian_filter1d(coords_3d, 5, axis=0)  # smooth the data, the points were oscillating
-            # coords_all_3d.append(coords_3d)
+                # coords_file = data_root + os.sep + f_3d
+                # dataset_name_3d = coords_file.split('/')[-1].split('.')[0]
+                # coords_3d = pd.read_csv(coords_file, header=2)
+                # coords_3d = coords_3d.values[:, 1:]  # exclude the index column
+                # coords_3d = np.around(coords_3d.astype('float'), 2)  # round to two decimal places
+                # coords_3d = gaussian_filter1d(coords_3d, 5, axis=0)  # smooth the data, the points were oscillating
+                # coords_all_3d.append(coords_3d)
 
-        coords_all_2d = np.vstack(coords_all_2d)  # convert to numpy stacked array
-        # coords_all_3d = np.vstack(coords_all_3d)
-        # x_3d = coords_all_3d[:, ::3];
-        # y_3d = coords_all_3d[:, 1::3];
-        # z_3d = coords_all_3d[:, 2::3];
-        x_2d = coords_all_2d[:, ::2];
-        y_2d = coords_all_2d[:, 1::2];
-        z_2d = np.zeros(x_2d.shape);
-        coords_all_3d_trans = []
-        # for i in np.arange(x_3d.shape[0]):
+            coords_all_2d = np.vstack(coords_all_2d)  # convert to numpy stacked array
+            # coords_all_3d = np.vstack(coords_all_3d)
+            # x_3d = coords_all_3d[:, ::3];
+            # y_3d = coords_all_3d[:, 1::3];
+            # z_3d = coords_all_3d[:, 2::3];
+            x_2d = coords_all_2d[:, ::2];
+            y_2d = coords_all_2d[:, 1::2];
+            z_2d = np.zeros(x_2d.shape);
+            coords_all_3d_trans = []
+            # for i in np.arange(x_3d.shape[0]):
 
-        k = 30  # K for k-means step of phenograph
-        communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
-        n_clus_2d = np.unique(communities_2d).shape[0]
+            communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
+            n_clus_2d = np.unique(communities_2d).shape[0]
 
-        # --end of phenograph
+            # --end of phenograph
 
-        # tsne_model = TSNE(n_components=2, random_state=2,perplexity=100,angle=0.1,init='pca',n_jobs= mp.cpu_count()-1)
-        tsne_model = TSNE(n_components=2, random_state=2, perplexity=perplexity, angle=0.1, init='pca', n_jobs=-1)
-        Y_2d = tsne_model.fit_transform(coords_all_2d)
-        cmap = plt.cm.colors.ListedColormap(plt.cm.jet(np.linspace(0, 1, n_clus_2d)))
-        plt.figure()
-        plt.scatter(Y_2d[:, 0], Y_2d[:, 1],
-                    c=communities_2d,
-                    cmap=cmap,
-                    alpha=1.0)
-        plt.colorbar(ticks=np.unique(communities_2d), label='Cluster#')
-        plt.xlabel('TSNE1');
-        plt.ylabel('TSNE2')
+            # tsne_model = TSNE(n_components=2, random_state=2,perplexity=100,angle=0.1,init='pca',n_jobs= mp.cpu_count()-1)
+            tsne_model = TSNE(n_components=2, random_state=2, perplexity=perplexity, angle=0.1, init='pca', n_jobs=-1,
+                              verbose=100)
+            Y_2d = tsne_model.fit_transform(coords_all_2d)
+            cmap = plt.cm.colors.ListedColormap(plt.cm.jet(np.linspace(0, 1, n_clus_2d)))
+            plt.figure()
+            plt.scatter(Y_2d[:, 0], Y_2d[:, 1],
+                        c=communities_2d,
+                        cmap=cmap,
+                        alpha=0.9,
+                        s=0.5)
+            plt.colorbar(ticks=np.unique(communities_2d), label='Cluster#')
+            plt.xlabel('TSNE1');
+            plt.ylabel('TSNE2')
 
-        name = getLastDirectory(path)
-        plt.title(' 2D Body coordinate clusters: total frames %s\n%s, perplexity = %i' % (
-            str(len(communities_2d)), name, perplexity))
+            name = getLastDirectory(path)
+            plt.title(' 2D Body coordinate clusters: total frames %s\n%s, perplexity = %i' % (
+                str(len(communities_2d)), name, perplexity))
 
-        plt.savefig(os.path.join('plots', name + 'p' + str(perplexity) + '.png'), format='png')
+            plt.savefig(os.path.join('plots', name + 'p' + str(perplexity) + '.png'), format='png')
 
-        plt.show()
+            plt.show()
