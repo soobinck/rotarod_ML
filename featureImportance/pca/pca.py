@@ -72,7 +72,6 @@ for path in paths:
     for f_2d in data_2d:
         coords_file = os.path.join(path, f_2d)
         # coords_2d = pd.read_csv(coords_file, dtype=np.float, header=2, index_col=0)
-        df = pd.read_csv(coords_file, index_col=0)
         coords_2d = pd.read_csv(coords_file, dtype=float, header=0, index_col=0)
         coords_2d.dropna(axis=0, inplace=True)
         coords_2d = coords_2d[columnNames]
