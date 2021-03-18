@@ -1,11 +1,6 @@
 import shutil
 
-from dataPrep import cleanCSV
-from dataPrep import pixel2mm
-from dataPrep import addVelocityColumnsBothFeet
-from dataPrep import fillnan
-from dataPrep import isStepUpFrame
-
+from dataPrep import *
 import pandas as pd
 import os
 import pathlib
@@ -46,11 +41,11 @@ def prepareData(dir_labelDictionary):
 
         # TODO: For each functions below, add progress bar, especially fillnan (t).
         lastDir = \
-            isStepUpFrame(
+            idxCSVs(isStepUpFrame(
                 addVelocityColumnsBothFeet(
                     pixel2mm(
                         fillnan(userinput_columns_likelihoods, userinput_pBoudn,
-                                cleanCSV(inputDir)))))
+                                cleanCSV(inputDir))))))
 
         copy_tree(lastDir, outputDir)
         shutil.rmtree(lastDir)

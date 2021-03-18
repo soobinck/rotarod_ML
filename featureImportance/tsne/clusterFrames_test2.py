@@ -1,6 +1,6 @@
 from pytransform3d.rotations import *
 from varname import nameof
-
+import csv
 import sys
 import os
 from numpy import random
@@ -93,6 +93,11 @@ for perplexity in perplexities:
             df = pd.DataFrame(coords_all_2d, columns=headers)
             df["Clustering"] = communities_2d
 
+            with open(os.path.join(path, 'clustered_' + getLastDirectory(path)), 'w', newline=''):
+                writer = csv.writer(df, delimiter=',')
+                for line in df:
+                    writer.writerow(line)
+            # df.to_csv(os.path.join(path, 'clustered_' + getLastDirectory(path)))
 
 
             break

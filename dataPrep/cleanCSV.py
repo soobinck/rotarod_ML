@@ -9,6 +9,7 @@ from utils.getDirAbsPath import outputAbsPath
 
 
 def cleanCSV(inputDir):
+    idx = 0
     prefix = 'cl_'
     outputDir = os.path.join(outputAbsPath(), 'cleanCSV')
 
