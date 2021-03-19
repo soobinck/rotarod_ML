@@ -1,23 +1,16 @@
 from sklearn.manifold import TSNE
-from pytransform3d.rotations import *
-from varname import nameof
 
+from varname import nameof
+from utils.getDirAbsPath import outputAbsPath
+import numpy as np
 import sys
 import os
-
+from copy import deepcopy
 sys.path.append("..")
-import cv2
 from os import listdir
 from os.path import isfile, join
-
-# matplotlib.use('tkagg')
-# matplotlib.use('WebAgg')
-
-
-import matplotlib.pyplot as plt
 import pandas as pd
 import phenograph
-import io
 
 
 def getLastDirectory(inputDir):
@@ -30,44 +23,64 @@ day3WT = os.path.join('..', '..', 'output', 'Day3_WT')
 day3YAC = os.path.join('..', '..', 'output', 'Day3_YAC')
 day4WT = os.path.join('..', '..', 'output', 'Day4_WT')
 day4YAC = os.path.join('..', '..', 'output', 'Day4_YAC')
-day3and4WT = os.path.join('..', '..', 'output', 'Day3and4_WT')
-day3and4YAC = os.path.join('..', '..', 'output', 'Day3and4_YAC')
 
-columnNames = ['rel RightY mm', 'rel LeftY mm', 'rel LeftX mm', 'rel RightX mm', 'Rightpaw euclidean velocity',
-               'Leftpaw euclidean velocity', 'wait time b4 step up']
-
-paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
-perplexities = [30, 100]
+paths = [day3WT, day4WT, day3YAC, day4YAC]
 ks = [30, 50, 100, 10]  # K for k-means step of phenograph
-for perplexity in perplexities[0]:
-    for k in ks[0]:
-        for path in paths[0]:
-            print('Running %s with k = %i, perplexity = %i.' % (path, k, perplexity))
-            data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
+for k in ks[:1]:
+    for path in paths:
 
-            df = pd.DataFrame(columns=columnNames)
-            coords_all_2d = []
-            dataset_name_2d = []
-            # for f_2d, f_3d in zip(data_2d, data_3d):
-            for f_2d in data_2d:
-                coords_file = os.path.join(path, f_2d)
-                dataset_name_2d = coords_file
-                coords_2d = pd.read_csv(coords_file, dtype=float, header=0, index_col=0)
-                df_2d = pd.read_csv(coords_file, dtype=float, index_col=0)
-                coords_2d.dropna(axis=0, inplace=True)
-                coords_2d = coords_2d[columnNames]
-                coords_2d = coords_2d.values[:, 3:]  # exclude first column
-                coords_2d = np.delete(coords_2d, list(range(2, coords_2d.shape[1], 3)),
-                                      axis=1)  # delete every 3rd column of prediction score
-                coords_all_2d.append(coords_2d)
-                df.append(df_2d)
+        data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
 
-            coords_all_2d = np.vstack(coords_all_2d)  # convert to numpy stacked array
+        coords_all_2d = []
 
-            x_2d = coords_all_2d[:, ::2];
-            y_2d = coords_all_2d[:, 1::2];
-            z_2d = np.zeros(x_2d.shape);
+        for f_2d in data_2d:
+            coords_file = os.path.join(path, f_2d)
+            coords_2d = pd.read_csv(coords_file, dtype=float, header=0, index_col=0)
+            coords_2d['file idx'] = int(f_2d[0])
 
-            # communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
+            coords_2d['file path'] = coords_file
+            coords_2d['nth frame'] = coords_2d.index + 1
+            coords_2d['nth second'] = (coords_2d.index + 1) / 20
 
-            break
+            coords_2d.dropna(axis=0,
+                             inplace=True)  # drop rows with na values. Please note that it will only drop the first and last few columns due to the fillnan function in dataCleaning process.
+
+            for col in coords_2d.columns:  # if the column name contains "Unnamed" or "likelihood", which is often genereated by Pandas and deeplabcut.
+                if 'Unnamed' in col:
+                    coords_2d = coords_2d.drop(columns=[col])
+
+                if 'likelihood' in col:
+                    coords_2d = coords_2d.drop(columns=[col])
+
+            headers = coords_2d.columns
+
+            # check if the next column is the index column
+            if np.array_equal(coords_2d.iloc[1:, 0].values, coords_2d.iloc[:-1, 0].values + 1):
+                print('The first column is the index column.')
+                coords_2d.index = coords_2d.iloc[:, 0]
+                coords_2d = coords_2d.drop(coords_2d.columns[0], axis=1)
+                headers = headers[1:]
+
+            df = deepcopy(coords_2d)
+            coords_2d.drop(columns=['file idx', 'file path', 'nth second'], inplace=True)
+            coords_2d = coords_2d.values
+
+            coords_all_2d.append(coords_2d)
+
+        coords_all_2d = np.vstack(coords_all_2d)  # convert to numpy stacked array
+
+        x_2d = coords_all_2d[:, ::2]
+        y_2d = coords_all_2d[:, 1::2]
+        z_2d = np.zeros(x_2d.shape)
+
+        communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
+
+        df["Clustering"] = communities_2d
+
+        outputDir = os.path.join(os.path.join(outputAbsPath('.'), 'featureImportance'), 'tsne', 'clusteredFrames',
+                                 'csvs')
+        if not os.path.exists(outputDir):
+            os.makedirs(outputDir)
+        outputPath = os.path.join(outputDir, 'clustered_' + getLastDirectory(path) + '.csv')
+        df.to_csv(outputPath)
+        print("Clustered csv files saved to %s" % outputPath)
