@@ -1,26 +1,11 @@
-from pytransform3d.rotations import *
-from varname import nameof
-import csv
-import sys
 import os
-from numpy import random
-
-sys.path.append("..")
-import cv2
-from os import listdir
-from os.path import isfile, join
-
-# matplotlib.use('tkagg')
-# matplotlib.use('WebAgg')
-
-
-import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import phenograph
-import io
-
-df = pd.DataFrame([1, 2, 3])
-
+from os import listdir
+from os.path import isfile, join
+from numpy import random
+from utils.getDirAbsPath import outputAbsPath
 
 def getLastDirectory(inputDir):
     if inputDir.endswith('/'):
@@ -35,7 +20,7 @@ day4YAC = os.path.join('..', '..', 'output', 'Day4_YAC')
 day3and4WT = os.path.join('..', '..', 'output', 'Day3and4_WT')
 day3and4YAC = os.path.join('..', '..', 'output', 'Day3and4_YAC')
 
-paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
+paths = [day3WT, day4WT, day3YAC, day4YAC]
 perplexities = [30, 100]
 ks = [30, 50, 100, 10]  # K for k-means step of phenograph
 for perplexity in perplexities:
@@ -45,14 +30,11 @@ for perplexity in perplexities:
             data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
 
             coords_all_2d = []
-            coords_all_3d = []
-            dataset_name_2d = []
-            dataset_name_3d = []
 
             for f_2d in data_2d:
                 coords_file = os.path.join(path, f_2d)
-                dataset_name_2d = coords_file
                 coords_2d = pd.read_csv(coords_file, dtype=float, header=0, index_col=0)
+                coords_2d['file idx'] = int(f_2d[0])
 
                 coords_2d['file path'] = coords_file
                 coords_2d['nth frame'] = coords_2d.index + 1
@@ -87,17 +69,16 @@ for perplexity in perplexities:
             y_2d = coords_all_2d[:, 1::2]
             z_2d = np.zeros(x_2d.shape)
 
-            # communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
+            communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
 
-            communities_2d = random.randint(33 + 1, size=coords_all_2d.shape[0])
             df = pd.DataFrame(coords_all_2d, columns=headers)
             df["Clustering"] = communities_2d
 
-            with open(os.path.join(path, 'clustered_' + getLastDirectory(path)), 'w', newline=''):
-                writer = csv.writer(df, delimiter=',')
-                for line in df:
-                    writer.writerow(line)
-            # df.to_csv(os.path.join(path, 'clustered_' + getLastDirectory(path)))
+            outputDir = os.path.join(os.path.join(outputAbsPath('.'), 'featureImportance'), 'tsne', 'clusteredFrames',
+                                     'csvs')
+            if not os.path.exists(outputDir):
+                os.makedirs(outputDir)
+
+            df.to_csv(os.path.join(outputDir, 'clustered_' + getLastDirectory(path) + '.csv'))
 
 
-            break
