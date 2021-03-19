@@ -1,49 +1,37 @@
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from scipy.cluster.hierarchy import dendrogram
-from pytransform3d.rotations import *
-from varname import nameof
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
-import sys
 import os
+import sys
+
+import numpy as np
+import seaborn as sns
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 sys.path.append("..")
-import cv2
 from os import listdir
 from os.path import isfile, join
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import phenograph
-import io
 
 
-def biplot(score, coeff, labels=None):
+def myplot(score, coeff, labels=None):
     xs = score[:, 0]
     ys = score[:, 1]
     n = coeff.shape[0]
     scalex = 1.0 / (xs.max() - xs.min())
     scaley = 1.0 / (ys.max() - ys.min())
-    plt.scatter(xs * scalex, ys * scaley, s=5)
+    # plt.scatter(xs * scalex, ys * scaley, s=5)
     for i in range(n):
         plt.arrow(0, 0, coeff[i, 0], coeff[i, 1], color='r', alpha=0.5)
-
-        textDistanceRatio = 1.05
         if labels is None:
-            plt.text(coeff[i, 0] * textDistanceRatio, coeff[i, 1] * textDistanceRatio, "Var" + str(i + 1), color='black', ha='center',
-                     va='center', weight='bold')
+            plt.text(coeff[i, 0] * 1.15, coeff[i, 1] * 1.15, "Var" + str(i + 1), color='green', ha='center',
+                     va='center')
         else:
-            plt.text(coeff[i, 0] * textDistanceRatio, coeff[i, 1] * textDistanceRatio, labels[i], color='black', ha='center', va='center',
-                     weight='bold')
+            plt.text(coeff[i, 0] * 1.15, coeff[i, 1] * 1.15, labels[i], color='g', ha='center', va='center')
 
     plt.xlabel("PC{}".format(1))
     plt.ylabel("PC{}".format(2))
     plt.grid()
-    plt.gca().set_aspect("equal")
 
 
 def getLastDirectory(inputDir):
@@ -60,10 +48,11 @@ day3and4WT = os.path.join('..', '..', 'output', 'Day3and4_WT')
 day3and4YAC = os.path.join('..', '..', 'output', 'Day3and4_YAC')
 
 # paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
-paths = [day3and4YAC]
+paths = [day3and4WT, day3and4YAC]
+# paths = [day3and4YAC]
 columnNames = ['rel RightY mm', 'rel LeftY mm', 'rel LeftX mm', 'rel RightX mm', 'Rightpaw euclidean velocity',
                'Leftpaw euclidean velocity', 'wait time b4 step up']
-# for path in paths:
+
 for path in paths:
     data_2d = [f for f in listdir(path) if (isfile(join(path, f)) and (not f.startswith('.')))]
 
@@ -89,7 +78,7 @@ for path in paths:
     pcamodel = PCA(n_components=5)
     pca = pcamodel.fit_transform(x)
 
-    figs, axs = plt.subplots(3, figsize=(18, 13), gridspec_kw={'height_ratios': [1,1,3]})
+    figs, axs = plt.subplots(3, figsize=(18, 13))
     figs.suptitle('PCA Analysis - %s' % name)
     axs[0].bar(range(1, len(pcamodel.explained_variance_) + 1), pcamodel.explained_variance_)
     axs[0].set(xlabel='Components', ylabel='Explained variance')
@@ -104,17 +93,18 @@ for path in paths:
     axs[1].plot(pcamodel.explained_variance_ratio_)
     axs[1].set(xlabel='number of components', ylabel='cumulative explained variance')
 
-    # axs[2].scatter(pca[:, 0], pca[:, 1], s=0.9)
+    axs[2].scatter(pca[:, 0], pca[:, 1], s=0.9)
     axs[2].set(xlabel='PCA1', ylabel='PCA2')
 
     axs[2].set_title('PCA: total frames %s - %s' % (
         str(len(x)), name))
 
-    biplot(pca[:, 0:2], np.transpose(pcamodel.components_[0:2, :]), list(x.columns))
+    myplot(pca[:, 0:2], np.transpose(pcamodel.components_[0:2, :]), list(x.columns))
+    plt.show()
 
     figs.tight_layout()
-    figs.savefig(os.path.join('.', 'plots', name + '.png'), format='png')
-
+    outputDir = os.path.join('.', 'plots', 'try2')
+    figs.savefig(os.path.join(outputDir, name + '.png'), format='png')
     plt.show()
 
     heatmap, ax = plt.subplots(1)
@@ -127,4 +117,4 @@ for path in paths:
 
     ax.set_aspect("equal")
 
-    heatmap.savefig(os.path.join('plots', 'heatmap_' + name  + '.png'), format='png')
+    heatmap.savefig(os.path.join(outputDir, 'heatmap_' + name  + '.png'), format='png')
