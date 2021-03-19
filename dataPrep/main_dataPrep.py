@@ -41,12 +41,14 @@ def prepareData(dir_labelDictionary):
 
         # TODO: For each functions below, add progress bar, especially fillnan (t).
         lastDir = \
-            idxCSVs(isStepUpFrame(
-                addVelocityColumnsBothFeet(
-                    pixel2mm(
-                        fillnan(userinput_columns_likelihoods, userinput_pBoudn,
-                                cleanCSV(inputDir))))))
+            idxCSVs(
+                isStepUpFrame(
+                    addVelocityColumnsBothFeet(
+                        pixel2mm(
+                            fillnan(userinput_columns_likelihoods, userinput_pBoudn,
+                                    cleanCSV(inputDir))))))
 
         copy_tree(lastDir, outputDir)
         shutil.rmtree(lastDir)
     return outputDir
+

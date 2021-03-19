@@ -5,14 +5,14 @@ def dataAbsPath(relativePath=os.path.join('./')):
     absolutePathofRelativePath = os.path.abspath(relativePath).split('/')
 
     return os.path.join('/',
-                        *absolutePathofRelativePath[:absolutePathofRelativePath.index('rotarod_ML') + 1])
+                        *absolutePathofRelativePath[:absolutePathofRelativePath.index('rotarod_ML10') + 1])
 
 
 def outputAbsPath(relativePath=os.path.join('./')):
     absolutePathofRelativePath = os.path.abspath(relativePath).split('/')
 
     return os.path.join('/',
-                        *absolutePathofRelativePath[:absolutePathofRelativePath.index('rotarod_ML') + 1],
+                        *absolutePathofRelativePath[:absolutePathofRelativePath.index('rotarod_ML10') + 1],
                         'output')
 
 

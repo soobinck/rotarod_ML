@@ -83,9 +83,9 @@ for perplexity in perplexities:
 
             coords_all_2d = np.vstack(coords_all_2d)  # convert to numpy stacked array
 
-            x_2d = coords_all_2d[:, ::2];
-            y_2d = coords_all_2d[:, 1::2];
-            z_2d = np.zeros(x_2d.shape);
+            x_2d = coords_all_2d[:, ::2]
+            y_2d = coords_all_2d[:, 1::2]
+            z_2d = np.zeros(x_2d.shape)
 
             # communities_2d, graph, Q = phenograph.cluster(coords_all_2d, k=k)
 
