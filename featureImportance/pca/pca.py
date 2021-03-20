@@ -34,10 +34,12 @@ def biplot(score, coeff, labels=None):
 
         textDistanceRatio = 1.05
         if labels is None:
-            plt.text(coeff[i, 0] * textDistanceRatio, coeff[i, 1] * textDistanceRatio, "Var" + str(i + 1), color='black', ha='center',
+            plt.text(coeff[i, 0] * textDistanceRatio, coeff[i, 1] * textDistanceRatio, "Var" + str(i + 1),
+                     color='black', ha='center',
                      va='center', weight='bold')
         else:
-            plt.text(coeff[i, 0] * textDistanceRatio, coeff[i, 1] * textDistanceRatio, labels[i], color='black', ha='center', va='center',
+            plt.text(coeff[i, 0] * textDistanceRatio, coeff[i, 1] * textDistanceRatio, labels[i], color='black',
+                     ha='center', va='center',
                      weight='bold')
 
     plt.xlabel("PC{}".format(1))
@@ -59,8 +61,8 @@ day4YAC = os.path.join('..', '..', 'output', 'Day4_YAC')
 day3and4WT = os.path.join('..', '..', 'output', 'Day3and4_WT')
 day3and4YAC = os.path.join('..', '..', 'output', 'Day3and4_YAC')
 
-# paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
-paths = [day3and4YAC]
+paths = [day3WT, day4WT, day3YAC, day4YAC, day3and4WT, day3and4YAC]
+# paths = [day3and4YAC]
 columnNames = ['rel RightY mm', 'rel LeftY mm', 'rel LeftX mm', 'rel RightX mm', 'Rightpaw euclidean velocity',
                'Leftpaw euclidean velocity', 'wait time b4 step up']
 # for path in paths:
@@ -89,7 +91,7 @@ for path in paths:
     pcamodel = PCA(n_components=5)
     pca = pcamodel.fit_transform(x)
 
-    figs, axs = plt.subplots(3, figsize=(18, 13), gridspec_kw={'height_ratios': [1,1,3]})
+    figs, axs = plt.subplots(3, figsize=(18, 13), gridspec_kw={'height_ratios': [1, 1, 3]})
     figs.suptitle('PCA Analysis - %s' % name)
     axs[0].bar(range(1, len(pcamodel.explained_variance_) + 1), pcamodel.explained_variance_)
     axs[0].set(xlabel='Components', ylabel='Explained variance')
@@ -115,9 +117,9 @@ for path in paths:
     figs.tight_layout()
     figs.savefig(os.path.join('.', 'plots', name + '.png'), format='png')
 
-    plt.show()
-
     heatmap, ax = plt.subplots(1)
+    heatmap.suptitle('PCA Analysis - %s' % name)
+
     ax = sns.heatmap(pcamodel.components_,
                      cmap='YlGnBu',
                      yticklabels=["PCA" + str(x) for x in range(1, pcamodel.n_components_ + 1)],
@@ -127,4 +129,6 @@ for path in paths:
 
     ax.set_aspect("equal")
 
-    heatmap.savefig(os.path.join('plots', 'heatmap_' + name  + '.png'), format='png')
+    heatmap.savefig(os.path.join('plots', 'heatmap_' + name + '.png'), format='png')
+
+    plt.show()
